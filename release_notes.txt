@@ -1,0 +1,125 @@
+// ****************************************************
+// * Release Notes for dma_ex_fft
+// ****************************************************
+//
+// ****************************************************
+//
+// Contents:
+//   1) Revision History
+//   2) Directory Structure
+//   3) Known Issues
+//   4) Misc
+//
+// ****************************************************
+//
+// 1) Revision History
+//
+//    - v1_0 - 27 November 2013
+//      * Initial Release
+//      * Hardware verification on Zedboard
+//
+// ****************************************************
+//
+// 2) Directory Structure
+//
+//    dma_ex_fft_v1_0 - Project root directory
+//     |
+//     |
+//     +-- bin - Pre-canned binaries
+//     |    |
+//     |    |
+//     |    +-- dma_ex_fft.elf - PS software executable
+//     |    |
+//     |    |
+//     |    +-- system.bit - PL hardware bitstream
+//     |
+//     |
+//     +-- doc - Documentation for project
+//     |    |
+//     |    |
+//     |    +-- bd_fft.bmp - Block diagram of design
+//     |    |
+//     |    |
+//     |    +-- intro.txt - Introduction to the design
+//     |    |
+//     |    |
+//     |    +-- tutorial.txt - Tutorial for using the design
+//     |
+//     |
+//     +-- lib - Custom IP libraries
+//     |    |
+//     |    |
+//     |    +-- xilinx.com_ip_edge_detect_1.0 - IP used to detect edge on GPIO for updating FFT configuration
+//     |
+//     |
+//     +-- matlab - Matlab files
+//     |    |
+//     |    |
+//     |    +-- gen_stim_header.m - Script for generating stimulus header file
+//     |
+//     |
+//     +-- proj - Vivado project
+//     |
+//     |
+//     +-- src
+//     |    |
+//     |    |
+//     |    +-- dma_ex_fft_top.v - Top level wrapper
+//     |
+//     |
+//     +-- sw
+//     |    |
+//     |    |
+//     |    +-- dma.c - Source for DMA, FFT, and GPIO initialization and operations
+//     |    |
+//     |    |
+//     |    +-- dma.h - Header for DMA, FFT, and GPIO initialization and operations
+//     |    |
+//     |    |
+//     |    +-- hello_world.c - Main source for software application
+//     |    |
+//     |    |
+//     |    +-- isr.c - Source for interrupt service routines
+//     |    |
+//     |    |
+//     |    +-- isr.h - Header for interrupt service routines
+//     |    |
+//     |    |
+//     |    +-- stim.h - Header containing declaration of stimulus buffer
+//     |
+//     |
+//     +-- tcl
+//     |    |
+//     |    |
+//     |    +-- bd.tcl - TCL for the IPI block diagram
+//     |    |
+//     |    |
+//     |    +-- create_archive.tcl - Cleanup extraneous files and create archive of project
+//     |    |
+//     |    |
+//     |    +-- dma_ex_fft.tcl - Create Vivado project for dma_ex_interrupt design
+//     |    |
+//     |    |
+//     |    +-- load_bit.tcl - Load the pre-canned bitstream into the PL
+//     |    |
+//     |    |
+//     |    +-- ps7_init.tcl - Configuration of the PS
+//     |
+//     |
+//     +-- release_notes.txt - This file
+//
+// ****************************************************
+//
+// 3) Known Issues
+//
+//    - Create_archive.tcl doesn't cleanup files
+/       correctly. It also doesn't create archive with
+//      the correct directory structure.
+//    - load_bit.tcl may fail for 32-bit machines... I
+//      haven't tested it.
+//
+// ****************************************************
+//
+// 4) Misc
+//
+// ****************************************************

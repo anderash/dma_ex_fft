@@ -1,0 +1,50 @@
+// ****************************************************
+// * Introduction for dma_ex_fft
+// ****************************************************
+//   This design is a slight divergence from the other
+// AXI DMA example designs because it represents a
+// slightly different use case. In the other designs,
+// the AXI DMA is used to bring 'external' data into
+// the Zynq-based embedded system, process the data,
+// and send it back out to the outside world. In this
+// example, however, the AXI DMA core is used in the
+// opposite fashion. Specifically, data is originating
+// in the ARM processor system where it is sent out to
+// a 'custom' co-processor, and finally returned to the
+// processor for final consumption.
+//
+//   After reviewing the other AXI DMA example designs,
+// you should understand that the AXI DMA is used to
+// move data around so that the processor is free to do
+// other things in the interim. In this example,
+// stimulus data (a linear combination of multiple
+// cosine waves at various frequencies) is taken from
+// main memory, sent out via the AXI DMA to the Xilinx
+// Fast Fourier Transform core. Once the core is done
+// computing the FFT, it sends the data back to a
+// different buffer in main memory. Finally, the DMA
+// engine issues an interrupt to tell the ARM that the
+// FFT data is ready for consumption. Since this is
+// simply an example, the ARM merely prints the output
+// data to the console at the user's request. An AXI
+// GPIO core is used to allow the processor to
+// configure the FFT core with various parameters.
+//
+//   The tutorials have been tested on the ZC702 and
+// the Zedboard. However, it should be easily ported
+// to any other Zynq platform due to the fact that
+// no external pins are used.
+//
+// ****************************************************
+//
+// References: 
+//   - Zynq-7000 All Programmable SoC Technical Reference Manual 
+//       http://www.xilinx.com/support/documentation/user_guides/ug585-Zynq-7000-TRM.pdf
+//   - AXI Reference Guide
+//       http://www.xilinx.com/support/documentation/ip_documentation/ug761_axi_reference_guide.pdf
+//   - AXI DMA Product Guide
+//       http://www.xilinx.com/support/documentation/ip_documentation/axi_dma/v7_1/pg021_axi_dma.pdf
+//   - Fast Fourier Transform Product Guide
+//       http://www.xilinx.com/support/documentation/ip_documentation/xfft/v9_0/pg109-xfft.pdf
+//
+// ****************************************************

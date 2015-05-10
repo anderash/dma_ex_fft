@@ -1,0 +1,153 @@
+// ****************************************************
+// * Tutorial for dma_ex_fft
+// ****************************************************
+//
+// ****************************************************
+//
+// Contents:
+//   1) Prerequisites
+//   2) Board Setup
+//   3) Tutorial 1 - Using the Pre-Canned Binaries
+//   4) Tutorial 2 - Re-Building the Hardware and
+//                   Software
+//
+// ****************************************************
+// 
+// 1) Prerequisites
+//
+//    - Install Vivado 2013.3 with SDK
+//    - Go through the Zynq CTT Guide - 
+//        http://www.xilinx.com/support/documentation/sw_manuals/xilinx14_6/ug873-zynq-ctt.pdf
+//    - Read the AXI Reference Guide - 
+//        http://www.xilinx.com/support/documentation/ip_documentation/ug761_axi_reference_guide.pdf
+//    - Read the AXI DMA Product Guide - 
+//        http://www.xilinx.com/support/documentation/ip_documentation/axi_dma/v7_0/pg021_axi_dma.pdf
+//   - Fast Fourier Transform Product Guide
+//       http://www.xilinx.com/support/documentation/ip_documentation/xfft/v9_0/pg109-xfft.pdf
+//    - Run through the dma_ex_polled and dma_ex_interrupt tutorials
+//
+// ****************************************************
+//
+// 2) Board Setup
+//
+//   - Plug the power cable into the Zedboard.
+//   - Connect Micro USB cables to J20 (JTAG) and J14
+//     (UART).
+//   - Power on the board.
+//   - Open a Serial (UART) connection to the board
+//     using an application such as Putty or Terra Term.
+//
+// ****************************************************
+//
+// 3) Tutorial 1 - Using the Pre-Canned Binaries
+//
+//   Step 1: Load the Bitstream into PL Fabric
+//     a. Launch a Vivado 2013.3 Tcl Shell (in Windows
+//        7, select 'Start' -> 'All Programs' -> 
+//        'Xilinx Design Tools' -> 'Vivado 2013.3' ->
+//        'Vivado 2013.3 Tcl Shell') and navigate to
+//        the ./dma_ex_fft_v1_0/tcl directory in
+//        the tcl console.
+//     b. Execute this command from the tcl console:
+//          xmd
+//        This will open an xmd console.
+//     c. Execute this command from the xmd console:
+//          source load_bit.tcl
+//        This will configure the PL fabric with the 
+//        configuration bitstream.
+//
+//   Step 2: Load the software application into the PS
+//     a. Execute these commands from the tcl console:
+//          connect arm hw
+//          source ps7_init.tcl
+//          ps7_init
+//          ps7_post_config
+//        This will initialize the processor.
+//     b. Execute these commands from the tcl console:
+//          dow ../bin/dma_ex_fft.elf
+//          run
+//        This will load the software application into
+//        memory and then run it on the PS.
+//     c. Observe the application's output in the
+//        serial (UART) console. You may interact with
+//        the application by using the commands on the
+//        display.
+//
+// ****************************************************
+//
+// 4) Tutorial 2 - Re-Building the Hardware and
+//                 Software
+//
+//   Step 1: Setup hardware
+//     a. Launch Vivado 2013.3 and navigate to the 
+//        ./dma_ex_fft_v1_0/tcl directory in the
+//        tcl console.
+//     b. Execute this command from the tcl console:
+//          source dma_ex_fft.tcl
+//        This will create and open a new Vivado 
+//        project for you.
+//     c. Click the 'Generate Bitstream' button.
+//     d. When write_bitstream completes, open the
+//        implemented design.
+//     e. Click 'File' -> 'Export' -> 'Export Hardware
+//        for SDK...' Ensure that the 'Export Hardware,'
+//        'Include Bitstream,' and 'Launch SDK' boxes
+//        are checked. Click 'OK.'
+//
+//   Step 2: Setup software
+//     a. When SDK launches, select 'File' -> 'New' ->
+//        'Application Project.'
+//     b. In the 'New Project' window, name the project
+//        'dma_ex_fft,' leave the rest defaults, and
+//        click 'Finish' to create a new software 
+//        project and BSP.
+//     c. In the 'Project Explorer' pane, right-click
+//        the 'dma_ex_fft' C project and select 'Import'
+//     d. In the 'Import' window, select 'General' ->
+//        'File System' and click 'Next'
+//     e. In the 'From Directory' option, browse to the
+//        ./dma_ex_fft_v1_0/sw directory and then
+//        ensure that the checkboxes for the following
+//        source code files are checked:
+//          dma.c
+//          dma.h
+//          helloworld.c
+//          isr.c
+//          isr.h
+//          stim.h
+//     f. In the 'Into folder' option, set the path to:
+//          dma_ex_fft/src
+//     g. Check the box for 'Overwrite existing
+//        resources without warning'
+//     h. Click 'Finish'
+//     i. Select 'Project' -> 'Clean...' Ensure that
+//        the 'Clean all projects' radio button is
+//        selected and then click 'OK'
+//
+//   Step 3: Run the application
+//     a. Select 'Xilinx Tools' -> 'Program FPGA' then
+//        click 'Program.' This will configure the PL
+//        with the hardware bitstream.
+//     b. In the 'Project Explorer' pane, right-click
+//        the 'dma_ex_fft' C project and select
+//        'Run As' -> 'Run Configurations...'
+//     c. In the left pane of the 'Run Configurations'
+//        window, double click the 'Xilinx C/C++
+//        application (GDB)' option then click 'Run'
+//     d. Observe the application's output in the
+//        serial (UART) console. You may interact with
+//        the application by using the commands on the
+//        display.
+//
+// ****************************************************
+//
+// 3) Known Issues
+//
+//    - load_bit.tcl may fail for 32-bit machines... I
+//      haven't tested it
+//
+// ****************************************************
+//
+// 4) Misc
+//
+// ****************************************************
