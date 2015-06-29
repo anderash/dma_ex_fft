@@ -26,7 +26,7 @@ module edge_detect
 )
 (
     input         clk,
-    input [N-1:0] din,
+    input [N-1:0] in,
     output        edge_detected
 );
 
@@ -37,9 +37,9 @@ module edge_detect
     assign edge_detected = edge_detected_i;
     
     always @ (posedge clk) begin
-        tmp <= din;
+        tmp <= in;
         
-        if (tmp != din)
+        if (tmp != in)
             edge_detected_i <= 1'b1;
         else
             edge_detected_i <= 1'b0;
@@ -47,5 +47,3 @@ module edge_detect
         
     
 endmodule
-
-

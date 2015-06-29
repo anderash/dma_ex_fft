@@ -45,7 +45,7 @@ module dma_ex_fft_top
     inout FIXED_IO_ps_srstb
 );
 
-    // ***** Instantiate PS *****
+    // Instantiate PS
     design_1_wrapper design_1_wrapper_i
     (
         .DDR_addr(DDR_addr),
@@ -70,4 +70,6 @@ module dma_ex_fft_top
         .FIXED_IO_ps_porb(FIXED_IO_ps_porb),
         .FIXED_IO_ps_srstb(FIXED_IO_ps_srstb)
     );
+	
 endmodule
+
