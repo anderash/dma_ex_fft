@@ -1,54 +1,42 @@
-/*
- * Copyright (c) 2009-2012 Xilinx, Inc.  All rights reserved.
- *
- * Xilinx, Inc.
- * XILINX IS PROVIDING THIS DESIGN, CODE, OR INFORMATION "AS IS" AS A
- * COURTESY TO YOU.  BY PROVIDING THIS DESIGN, CODE, OR INFORMATION AS
- * ONE POSSIBLE   IMPLEMENTATION OF THIS FEATURE, APPLICATION OR
- * STANDARD, XILINX IS MAKING NO REPRESENTATION THAT THIS IMPLEMENTATION
- * IS FREE FROM ANY CLAIMS OF INFRINGEMENT, AND YOU ARE RESPONSIBLE
- * FOR OBTAINING ANY RIGHTS YOU MAY REQUIRE FOR YOUR IMPLEMENTATION.
- * XILINX EXPRESSLY DISCLAIMS ANY WARRANTY WHATSOEVER WITH RESPECT TO
- * THE ADEQUACY OF THE IMPLEMENTATION, INCLUDING BUT NOT LIMITED TO
- * ANY WARRANTIES OR REPRESENTATIONS THAT THIS IMPLEMENTATION IS FREE
- * FROM CLAIMS OF INFRINGEMENT, IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.
- *
- */
 
-/*
- * helloworld.c: simple test application
- *
- * This application configures UART 16550 to baud rate 9600.
- * PS7 UART (Zynq) is not initialized by this application, since
- * bootrom/bsp configures it to baud rate 115200
- *
- * ------------------------------------------------
- * | UART TYPE   BAUD RATE                        |
- * ------------------------------------------------
- *   uartns550   9600
- *   uartlite    Configurable only in HW design
- *   ps7_uart    115200 (configured by bootrom/bsp)
- */
- 
+//////////////////////////////////////////////////////////////////////////////////
 //
-// Notes:
-//   - Reset for counter hardware (GPIO[0]) is active low
-//   - Assumes S2MM and MM2S stream data widths are the same
+// Company:        Xilinx
+// Engineer:       bwiec
+// Create Date:    29 June 2015, 03:34:03 PM
+// App Name:       DMA Accelerator Demonstration
+// File Name:      main.c
+// Target Devices: Zynq
+// Tool Versions:  2015.1
+// Description:    Implementation of FFT and FIR using a hardware accelerator with
+//                 DMA.
+// Dependencies:
+//   - xuartps_hw.h - Driver version v3.0
+//   - fft.h        - Driver version v1.0
+//   - cplx_data.h  - Driver version v1.0
+//   - stim.h       - Driver version v1.0
+// Revision History:
+//   - v1.0
+//     * Initial release
+//     * Tested on ZC702 and Zedboard
+// Additional Comments:
+//   - UART baud rate is 115200
+//   - GPIO is used with some additional glue logic to control the FFT core's
+//     config interface for setting various parameters.
 //
+//////////////////////////////////////////////////////////////////////////////////
 
 // Includes
 #include <stdio.h>
+#include <stdlib.h>
 #include "platform.h"
 #include "xuartps_hw.h"
 #include "fft.h"
-#include "cplx.h"
+#include "cplx_data.h"
 #include "stim.h"
 
-// Defines
-
 // External data
-extern int stim_buf[FFT_MAX_NUM_PTS]; // FFT input data
+extern int sig_two_sine_waves[FFT_MAX_NUM_PTS]; // FFT input data
 
 // Function prototypes
 void which_fft_param(fft_t* p_fft_inst);
@@ -56,11 +44,14 @@ void which_fft_param(fft_t* p_fft_inst);
 // Main entry point
 int main()
 {
+
 	// Local variables
-	int         status = 0;
-	char        c;
-	cplx_data_t result_buf[FFT_MAX_NUM_PTS]; // FFT output data (could use dynamic memory here...)
-	fft_t*      p_fft_inst;
+	int          status = 0;
+	char         c;
+	fft_t*       p_fft_inst;
+	cplx_data_t* stim_buf;
+	cplx_data_t* result_buf;
+
 
 	// Setup UART and enable caches
     init_platform();
@@ -78,8 +69,26 @@ int main()
     if (p_fft_inst == NULL)
     {
     	xil_printf("ERROR! Failed to create FFT instance.\n\r");
-    	return XST_FAILURE;
+    	return -1;
     }
+
+    // Allocate data buffers
+    stim_buf = (cplx_data_t*) malloc(sizeof(cplx_data_t)*FFT_MAX_NUM_PTS);
+    if (stim_buf == NULL)
+    {
+    	xil_printf("ERROR! Failed to allocate memory for the stimulus buffer.\n\r");
+    	return -1;
+    }
+
+    result_buf = (cplx_data_t*) malloc(sizeof(cplx_data_t)*FFT_MAX_NUM_PTS);
+    if (result_buf == NULL)
+    {
+    	xil_printf("ERROR! Failed to allocate memory for the result buffer.\n\r");
+    	return -1;
+    }
+
+    // Fill stimulus buffer with some signal
+    memcpy(stim_buf, sig_two_sine_waves, sizeof(cplx_data_t)*FFT_MAX_NUM_PTS);
 
     // Main control loop
     while (1)
@@ -90,8 +99,9 @@ int main()
     	xil_printf("0: Print current FFT parameters\n\r");
     	xil_printf("1: Change FFT parameters\n\r");
     	xil_printf("2: Perform FFT using current parameters\n\r");
-    	xil_printf("3: Print results of previous FFT operation\n\r");
-    	xil_printf("4: Quit\n\r");
+    	xil_printf("3: Print current stimulus to be used for the FFT operation\n\r");
+    	xil_printf("4: Print results of previous FFT operation\n\r");
+    	xil_printf("5: Quit\n\r");
     	c = XUartPs_RecvByte(XPAR_PS7_UART_1_BASEADDR);
 
     	if (c == '0')
@@ -106,22 +116,27 @@ int main()
     	}
     	else if (c == '2') // Run FFT
 		{
-			// Make sure the buffer is clear before we populate it
-			memset(result_buf, 0, FFT_MAX_NUM_PTS*sizeof(cplx_data_t));
+			// Make sure the buffer is clear before we populate it (this is generally not necessary and wastes time doing memory accesses, but for proving the DMA working, we do it anyway)
+			memset(result_buf, 0, sizeof(cplx_data_t)*FFT_MAX_NUM_PTS);
 
 			status = fft(p_fft_inst, (cplx_data_t*)stim_buf, (cplx_data_t*)result_buf);
-			if (status != XST_SUCCESS)
+			if (status != FFT_SUCCESS)
 			{
 				xil_printf("ERROR! FFT failed.\n\r");
-				return XST_FAILURE;
+				return -1;
 			}
+
 			xil_printf("FFT complete!\n\r");
 		}
     	else if (c == '3')
     	{
-    		fft_print_results(p_fft_inst, result_buf);
+    		fft_print_stim_buf(p_fft_inst);
     	}
-    	else if (c == '4') // Quit
+    	else if (c == '4')
+    	{
+    		fft_print_result_buf(p_fft_inst);
+    	}
+    	else if (c == '5') // Quit
     	{
     		xil_printf("Okay, exiting...\n\r");
     		break;
@@ -133,13 +148,13 @@ int main()
 
     }
 
+    free(stim_buf);
+    free(result_buf);
     fft_destroy(p_fft_inst);
 
-    return XST_SUCCESS;
+    return 0;
 
 }
-
-
 
 void which_fft_param(fft_t* p_fft_inst)
 {

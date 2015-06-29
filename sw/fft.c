@@ -1,13 +1,8 @@
-/*
- * fft.c
- *
- *  Created on: May 11, 2015
- *      Author: bwiec
- */
 
 // Includes
-#include "fft.h"
 #include <stdlib.h>
+#include "fft.h"
+#include "xgpio.h"
 
 // Private data
 typedef struct fft_periphs
@@ -16,6 +11,7 @@ typedef struct fft_periphs
 	XGpio        gpio_inst;
 } fft_periphs_t;
 
+// Object definition
 typedef struct fft
 {
 	fft_periphs_t periphs;
@@ -26,16 +22,14 @@ typedef struct fft
 
 // Private functions
 static int is_power_of_2(int x)
-// Determines if the input integer is a power of two
+// Determines if the input integer is a power of two.
 {
-
 	while ((x % 2 == 0) && (x > 1))
 	{
 		x /= 2;
 	}
 
 	return (x == 1);
-
 }
 
 static int int_log2(int x)
@@ -60,31 +54,30 @@ static int init_gpio(XGpio* p_gpio_inst, int gpio_device_id)
 	// Local variables
 	int status = 0;
 
-	xil_printf("Initializing GPIO...\n\r");
-
 	// Initialize driver
 	status = XGpio_Initialize(p_gpio_inst, gpio_device_id);
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Initialization of AXI GPIO instance failed.\n\r");
-		return XST_FAILURE;
+		return FFT_GPIO_INIT_FAIL;
 	}
 
-	xil_printf("GPIO initialization complete!\n\r");
-
-	return XST_SUCCESS;
+	return FFT_SUCCESS;
 
 }
 
 static void fft_commit_params(fft_t* p_fft_inst)
 {
+
+	// Local variables
 	int reg = 0;
 
-	reg  = (p_fft_inst->scale_sch         << 9) & FFT_SCALE_SCH_MASK;
-	reg |= (p_fft_inst->fwd_inv           << 8) & FFT_FWD_INV_MASK;
-	reg |= (int_log2(p_fft_inst->num_pts) << 0) & FFT_NUM_PTS_MASK;
+	reg  = (p_fft_inst->scale_sch         << FFT_SCALE_SCH_SHIFT) & FFT_SCALE_SCH_MASK;
+	reg |= (p_fft_inst->fwd_inv           << FFT_FWD_INV_SHIFT)   & FFT_FWD_INV_MASK;
+	reg |= (int_log2(p_fft_inst->num_pts) << FFT_NUM_PTS_SHIFT)   & FFT_NUM_PTS_MASK;
 
 	XGpio_DiscreteWrite(&p_fft_inst->periphs.gpio_inst, 1, reg);
+
 }
 
 // Public functions
@@ -121,7 +114,7 @@ fft_t* fft_create(int gpio_device_id, int dma_device_id, int intc_device_id, int
 
 	// Register and initialize peripherals
 	status = init_gpio(&p_obj->periphs.gpio_inst, gpio_device_id);
-	if (status != XST_SUCCESS)
+	if (status != FFT_SUCCESS)
 	{
 		xil_printf("ERROR! Failed to initialize GPIO.\n\r");
 		fft_destroy(p_obj);
@@ -195,11 +188,6 @@ int fft_get_scale_sch(fft_t* p_fft_inst)
 }
 
 int fft(fft_t* p_fft_inst, cplx_data_t* din, cplx_data_t* dout)
-//
-// Not a great implementation. This assumes cplx_data_t occupies the same data space
-// of sample_t and that is an int. How do we override sample_t type when calling dma_accel
-// lib from fft lib? Union?
-//
 {
 	// Local variables
 	int status = 0;
@@ -239,19 +227,39 @@ void fft_print_params(fft_t* p_fft_inst)
 	xil_printf("scale_sch = 0x%X\n\r", p_fft_inst->scale_sch);
 }
 
-void fft_print_results(fft_t* p_fft_inst, cplx_data_t* p_result_buf)
+void fft_print_stim_buf(fft_t* p_fft_inst)
 {
 
 	// Local variables
-	int ii = 0;
-	char str[25]; // Large enough to hold 2 ints plus extra characters
+	int          ii = 0;
+	char         str[25]; // Large enough to hold 2 ints plus extra characters
+	cplx_data_t* tmp;
+
+	tmp = (cplx_data_t*)dma_accel_get_stim_buf(p_fft_inst->periphs.p_dma_accel_inst);
 
 	for (ii = 0; ii < p_fft_inst->num_pts; ii++)
 	{
-		cplx_data_get_string(str, p_result_buf[ii]);
-		xil_printf("Xk(%d) = %s\n\r", ii, str);
+		cplx_data_get_string(str, tmp[ii]);
+		xil_printf("xn(%d) = %s\n\r", ii, str);
 	}
 
 }
 
+void fft_print_result_buf(fft_t* p_fft_inst)
+{
+
+	// Local variables
+	int          ii = 0;
+	char         str[25]; // Large enough to hold 2 ints plus extra characters
+	cplx_data_t* tmp;
+
+	tmp = (cplx_data_t*)dma_accel_get_result_buf(p_fft_inst->periphs.p_dma_accel_inst);
+
+	for (ii = 0; ii < p_fft_inst->num_pts; ii++)
+	{
+		cplx_data_get_string(str, tmp[ii]);
+		xil_printf("Xk(%d) = %s\n\r", ii, str);
+	}
+
+}
 

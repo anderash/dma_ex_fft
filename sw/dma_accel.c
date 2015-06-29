@@ -1,13 +1,9 @@
-/*
- * dma.c
- *
- *  Created on: Jul 31, 2013
- *      Author: bwiec
- */
 
 // Includes
 #include <stdlib.h>
-#include "dma.h"
+#include "xaxidma.h"
+#include "xscugic.h"
+#include "dma_accel.h"
 
 // Defines
 #define RESET_TIMEOUT_COUNTER 10000
@@ -24,6 +20,7 @@ typedef struct dma_accel_periphs
 	XScuGic intc_inst;
 } dma_accel_periphs_t;
 
+// Object definition
 typedef struct dma_accel
 {
 	dma_accel_periphs_t periphs;
@@ -38,9 +35,9 @@ static void s2mm_isr(void* CallbackRef)
 {
 
 	// Local variables
-	u32      irq_status;
+	int      irq_status;
 	int      time_out;
-	XAxiDma *p_axi_dma_inst = (XAxiDma *)CallbackRef;
+	XAxiDma* p_axi_dma_inst = (XAxiDma*)CallbackRef;
 
 	// Disable interrupts
 	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
@@ -93,9 +90,9 @@ static void mm2s_isr(void* CallbackRef)
 {
 
 	// Local variables
-	u32 irq_status;
-	int time_out;
-	XAxiDma *p_axi_dma_inst = (XAxiDma *)CallbackRef;
+	int      irq_status;
+	int      time_out;
+	XAxiDma* p_axi_dma_inst = (XAxiDma*)CallbackRef;
 
 	// Disable interrupts
 	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
@@ -149,15 +146,15 @@ static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_axi_dm
 {
 
 	// Local variables
-	int            status = 0;
-	XScuGic_Config *cfg_ptr;
+	int             status = 0;
+	XScuGic_Config* cfg_ptr;
 
 	// Look up hardware configuration for device
 	cfg_ptr = XScuGic_LookupConfig(intc_device_id);
 	if (!cfg_ptr)
 	{
 		xil_printf("ERROR! No hardware configuration found for Interrupt Controller with device id %d.\r\n", intc_device_id);
-		return XST_FAILURE;
+		return DMA_ACCEL_INTC_INIT_FAIL;
 	}
 
 	// Initialize driver
@@ -165,7 +162,7 @@ static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_axi_dm
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Initialization of Interrupt Controller failed with %d.\r\n", status);
-		return XST_FAILURE;
+		return DMA_ACCEL_INTC_INIT_FAIL;
 	}
 
 	// Set interrupt priorities and trigger type
@@ -177,13 +174,13 @@ static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_axi_dm
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Failed to connect s2mm_isr to the interrupt controller.\r\n", status);
-		return status;
+		return DMA_ACCEL_INTC_INIT_FAIL;
 	}
 	status = XScuGic_Connect(p_intc_inst, mm2s_intr_id, (Xil_InterruptHandler)mm2s_isr, p_axi_dma_inst);
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Failed to connect mm2s_isr to the interrupt controller.\r\n", status);
-		return status;
+		return DMA_ACCEL_INTC_INIT_FAIL;
 	}
 
 	// Enable all interrupts
@@ -197,7 +194,7 @@ static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_axi_dm
 	// Enable non-critical exceptions
 	Xil_ExceptionEnable();
 
-	return XST_SUCCESS;
+	return DMA_ACCEL_SUCCESS;
 
 }
 
@@ -205,15 +202,15 @@ static int init_dma(XAxiDma* p_axi_dma_inst, int dma_device_id)
 {
 
 	// Local variables
-	int            status = 0;
-	XAxiDma_Config *cfg_ptr;
+	int             status = 0;
+	XAxiDma_Config* cfg_ptr;
 
 	// Look up hardware configuration for device
 	cfg_ptr = XAxiDma_LookupConfig(dma_device_id);
 	if (!cfg_ptr)
 	{
 		xil_printf("ERROR! No hardware configuration found for AXI DMA with device id %d.\r\n", dma_device_id);
-		return XST_FAILURE;
+		return DMA_ACCEL_DMA_INIT_FAIL;
 	}
 
 	// Initialize driver
@@ -221,14 +218,14 @@ static int init_dma(XAxiDma* p_axi_dma_inst, int dma_device_id)
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Initialization of AXI DMA failed with %d\r\n", status);
-		return XST_FAILURE;
+		return DMA_ACCEL_DMA_INIT_FAIL;
 	}
 
 	// Test for Scatter Gather
 	if (XAxiDma_HasSg(p_axi_dma_inst))
 	{
 		xil_printf("ERROR! Device configured as SG mode.\r\n");
-		return XST_FAILURE;
+		return DMA_ACCEL_DMA_INIT_FAIL;
 	}
 
 	// Disable interrupts for both channels
@@ -243,7 +240,7 @@ static int init_dma(XAxiDma* p_axi_dma_inst, int dma_device_id)
 	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
 	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
 
-	return XST_SUCCESS;
+	return DMA_ACCEL_SUCCESS;
 
 }
 
@@ -307,24 +304,9 @@ void dma_accel_destroy(dma_accel_t* p_dma_accel_inst)
 	free(p_dma_accel_inst);
 }
 
-int dma_accel_get_buf_length(dma_accel_t* p_dma_accel_inst)
+void dma_accel_set_stim_buf(dma_accel_t* p_dma_accel_inst, void* p_stim_buf)
 {
-	return (p_dma_accel_inst->buf_length);
-}
-
-void dma_accel_set_buf_length(dma_accel_t* p_dma_accel_inst, int buf_length)
-{
-	p_dma_accel_inst->buf_length = buf_length;
-}
-
-int dma_accel_get_sample_size_bytes(dma_accel_t* p_dma_accel_inst)
-{
-	return (p_dma_accel_inst->sample_size_bytes);
-}
-
-void dma_accel_set_sample_size_bytes(dma_accel_t* p_dma_accel_inst, int sample_size_bytes)
-{
-	p_dma_accel_inst->sample_size_bytes = sample_size_bytes;
+	p_dma_accel_inst->p_stim_buf = p_stim_buf;
 }
 
 void* dma_accel_get_stim_buf(dma_accel_t* p_dma_accel_inst)
@@ -332,9 +314,9 @@ void* dma_accel_get_stim_buf(dma_accel_t* p_dma_accel_inst)
 	return (p_dma_accel_inst->p_stim_buf);
 }
 
-void dma_accel_set_stim_buf(dma_accel_t* p_dma_accel_inst, void* p_stim_buf)
+void dma_accel_set_result_buf(dma_accel_t* p_dma_accel_inst, void* p_result_buf)
 {
-	p_dma_accel_inst->p_stim_buf = p_stim_buf;
+	p_dma_accel_inst->p_result_buf = p_result_buf;
 }
 
 void* dma_accel_get_result_buf(dma_accel_t* p_dma_accel_inst)
@@ -342,9 +324,24 @@ void* dma_accel_get_result_buf(dma_accel_t* p_dma_accel_inst)
 	return (p_dma_accel_inst->p_result_buf);
 }
 
-void dma_accel_set_result_buf(dma_accel_t* p_dma_accel_inst, void* p_result_buf)
+void dma_accel_set_buf_length(dma_accel_t* p_dma_accel_inst, int buf_length)
 {
-	p_dma_accel_inst->p_result_buf = p_result_buf;
+	p_dma_accel_inst->buf_length = buf_length;
+}
+
+int dma_accel_get_buf_length(dma_accel_t* p_dma_accel_inst)
+{
+	return (p_dma_accel_inst->buf_length);
+}
+
+void dma_accel_set_sample_size_bytes(dma_accel_t* p_dma_accel_inst, int sample_size_bytes)
+{
+	p_dma_accel_inst->sample_size_bytes = sample_size_bytes;
+}
+
+int dma_accel_get_sample_size_bytes(dma_accel_t* p_dma_accel_inst)
+{
+	return (p_dma_accel_inst->sample_size_bytes);
 }
 
 int dma_accel_xfer(dma_accel_t* p_dma_accel_inst)
@@ -373,10 +370,10 @@ int dma_accel_xfer(dma_accel_t* p_dma_accel_inst)
 		num_bytes,
 		XAXIDMA_DMA_TO_DEVICE
 	);
-	if (status != XST_SUCCESS)
+	if (status != DMA_ACCEL_SUCCESS)
 	{
 		xil_printf("ERROR! Failed to kick off MM2S transfer!\n\r");
-		return XST_FAILURE;
+		return DMA_ACCEL_XFER_FAIL;
 	}
 
 	// Kick off S2MM transfer
@@ -387,10 +384,10 @@ int dma_accel_xfer(dma_accel_t* p_dma_accel_inst)
 		num_bytes,
 		XAXIDMA_DEVICE_TO_DMA
 	);
-	if (status != XST_SUCCESS)
+	if (status != DMA_ACCEL_SUCCESS)
 	{
 		xil_printf("ERROR! Failed to kick off MM2S transfer!\n\r");
-		return XST_FAILURE;
+		return DMA_ACCEL_XFER_FAIL;
 	}
 
 	// Wait for transfer to complete
@@ -400,10 +397,10 @@ int dma_accel_xfer(dma_accel_t* p_dma_accel_inst)
 	if (g_dma_err)
 	{
 		xil_printf("ERROR! AXI DMA returned an error during the MM2S transfer.\n\r");
-		return XST_FAILURE;
+		return DMA_ACCEL_XFER_FAIL;
 	}
 
-	return XST_SUCCESS;
+	return DMA_ACCEL_SUCCESS;
 
 }
 
