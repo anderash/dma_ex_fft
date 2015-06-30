@@ -5,7 +5,7 @@
 // Engineer:       bwiec
 // Create Date:    29 June 2015, 03:34:03 PM
 // App Name:       DMA Accelerator Demonstration
-// File Name:      main.c
+// File Name:      helloworld.c
 // Target Devices: Zynq
 // Tool Versions:  2015.1
 // Description:    Implementation of FFT and FIR using a hardware accelerator with
@@ -63,8 +63,8 @@ int main()
     	XPAR_GPIO_0_DEVICE_ID,
     	XPAR_AXIDMA_0_DEVICE_ID,
     	XPAR_PS7_SCUGIC_0_DEVICE_ID,
-    	XPAR_FABRIC_AXI_DMA_0_S2MM_INTROUT_INTR,
-    	XPAR_FABRIC_AXI_DMA_0_MM2S_INTROUT_INTR
+    	XPAR_FABRIC_CTRL_AXI_DMA_0_S2MM_INTROUT_INTR,
+    	XPAR_FABRIC_CTRL_AXI_DMA_0_MM2S_INTROUT_INTR
     );
     if (p_fft_inst == NULL)
     {

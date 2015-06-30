@@ -30,7 +30,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 # If you do not already have a project created,
 # you can create a project using the following command:
 #    create_project project_1 myproj -part xc7z020clg484-1
-#    set_property BOARD_PART em.avnet.com:zed:part0:1.3 [current_project]
+#    set_property BOARD_PART xilinx.com:zc702:part0:1.2 [current_project]
 
 # CHECKING IF PROJECT EXISTS
 if { [get_projects -quiet] eq "" } {
@@ -310,11 +310,11 @@ proc create_root_design { parentCell } {
 
   # Create instance: processing_system7_0, and set properties
   set processing_system7_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0 ]
-  set_property -dict [ list CONFIG.PCW_IRQ_F2P_INTR {1} CONFIG.PCW_USE_FABRIC_INTERRUPT {1} CONFIG.PCW_USE_S_AXI_HP0 {1} CONFIG.preset {ZedBoard}  ] $processing_system7_0
+  set_property -dict [ list CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {100} CONFIG.PCW_IRQ_F2P_INTR {1} CONFIG.PCW_USE_FABRIC_INTERRUPT {1} CONFIG.PCW_USE_S_AXI_HP0 {1} CONFIG.preset {ZC702}  ] $processing_system7_0
 
   # Create interface connections
   connect_bd_intf_net -intf_net axi_dma_0_m_axis_mm2s [get_bd_intf_pins accelerator/S_AXIS_DATA] [get_bd_intf_pins ctrl/M_AXIS_ACCEL]
-  connect_bd_intf_net -intf_net axi_interconnect_0_m00_axi [get_bd_intf_pins ctrl/M_AXI_DMA_DATA] [get_bd_intf_pins processing_system7_0/S_AXI_HP0]
+  connect_bd_intf_net -intf_net ctrl_M_AXI_DMA_DATA [get_bd_intf_pins ctrl/M_AXI_DMA_DATA] [get_bd_intf_pins processing_system7_0/S_AXI_HP0]
   connect_bd_intf_net -intf_net processing_system7_0_ddr [get_bd_intf_ports DDR] [get_bd_intf_pins processing_system7_0/DDR]
   connect_bd_intf_net -intf_net processing_system7_0_fixed_io [get_bd_intf_ports FIXED_IO] [get_bd_intf_pins processing_system7_0/FIXED_IO]
   connect_bd_intf_net -intf_net s00_axi_1 [get_bd_intf_pins ctrl/S_AXI] [get_bd_intf_pins processing_system7_0/M_AXI_GP0]
@@ -322,10 +322,10 @@ proc create_root_design { parentCell } {
 
   # Create port connections
   connect_bd_net -net axi_gpio_0_gpio_io_o [get_bd_pins accelerator/s_axis_config_tdata] [get_bd_pins ctrl/fft_config_tdata]
+  connect_bd_net -net ctrl_dma_irqs [get_bd_pins ctrl/dma_irqs] [get_bd_pins processing_system7_0/IRQ_F2P]
   connect_bd_net -net edge_detect_0_edge_detected [get_bd_pins accelerator/s_axis_config_tvalid] [get_bd_pins ctrl/fft_config_tvalid]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N [get_bd_pins ctrl/ext_reset_in] [get_bd_pins processing_system7_0/FCLK_RESET0_N]
   connect_bd_net -net processing_system7_0_fclk_clk0 [get_bd_pins accelerator/aclk] [get_bd_pins ctrl/ctrl_aclk] [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins processing_system7_0/S_AXI_HP0_ACLK]
-  connect_bd_net -net xlconcat_0_dout [get_bd_pins ctrl/dma_irqs] [get_bd_pins processing_system7_0/IRQ_F2P]
 
   # Create address segments
   create_bd_addr_seg -range 0x10000 -offset 0x40400000 [get_bd_addr_spaces processing_system7_0/Data] [get_bd_addr_segs ctrl/axi_dma_0/S_AXI_LITE/Reg] SEG_axi_dma_0_Reg

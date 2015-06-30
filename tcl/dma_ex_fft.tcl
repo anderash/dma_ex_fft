@@ -6,7 +6,7 @@
 # User-editable parameters
 #-----------------------------------------------------------
 # target_board can be: zedboard, zc702
-set target_board zedboard
+set target_board zc702
 
 #-----------------------------------------------------------
 # Constant parameters
