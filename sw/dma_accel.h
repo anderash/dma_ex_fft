@@ -15,7 +15,7 @@
 // Revision History:
 //   - v1.0
 //     * Initial release
-//     * Tested on ZC702 and Zedboard with FFT and FIR accelerators
+//     * Tested on ZC702 and Zedboard with FFT accelerator
 // Additional Comments:
 //   - This library is intended to be used as a layer between the base xaxidma
 //     driver and application software. The programming model is an

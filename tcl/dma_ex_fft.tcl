@@ -49,12 +49,6 @@ create_project $design_name_full "../proj/$design_name_full" -part $target_part
 set_property board $board_property [current_project]
 
 #-----------------------------------------------------------
-# Add HDL source to design
-#-----------------------------------------------------------
-puts "Adding HDL source to the design..."
-add_files -fileset sources_1 "../src"
-
-#-----------------------------------------------------------
 # Add HDL IP repositories
 #-----------------------------------------------------------
 set_property ip_repo_paths "../lib" [current_fileset]
@@ -78,5 +72,5 @@ wait_on_run impl_1
 # Export hardware for SDK
 #-----------------------------------------------------------
 file mkdir "../proj/$design_name_full/$design_name_full.sdk"
-file copy -force "../proj/$design_name_full/$design_name_full.runs/impl_1/${proj_name}_top.sysdef" "../proj/$design_name_full/$design_name_full.sdk/${proj_name}_top.hdf"
+file copy -force "../proj/$design_name_full/$design_name_full.runs/impl_1/design_1_wrapper.sysdef" "../proj/$design_name_full/$design_name_full.sdk/design_1_wrapper.hdf"
 

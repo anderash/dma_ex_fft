@@ -17,7 +17,7 @@ typedef struct fft
 	fft_periphs_t periphs;
 	fft_fwd_inv_t fwd_inv;
 	int           num_pts;
-	int           scale_sch; // Do something smarter than int...
+	int           scale_sch;
 } fft_t;
 
 // Private functions

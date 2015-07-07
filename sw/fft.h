@@ -30,6 +30,12 @@
 #include "cplx_data.h"
 #include "dma_accel.h"
 
+// Parameter macros
+#define FFT_ARCH_PIPELINED   0
+#define FFT_ARCH_RADIX4      1
+#define FFT_ARCH_RADIX2      2
+#define FFT_ARCH_RADIX2_LITE 3
+
 // Hardware-specific parameters
 #define FFT_MAX_NUM_PTS      8192
 #define FFT_NUM_PTS_MASK     0x0000001F // Bits [4:0]

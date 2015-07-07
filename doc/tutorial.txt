@@ -118,7 +118,7 @@ Contents:
 	i. Right-click the dma_ex_fft C project int
 	   the 'Project Explorer' pane and select 'Generate
 	   Linker Script.' Change both the 'Heap Size' and
-	   'Stack Size' to 8192 and click 'Generate.' Click
+	   'Stack Size' to 262144 and click 'Generate.' Click
 	   'Yes' to overwrite the existing linker script.
     j. Select 'Project' -> 'Clean...' Ensure that
        the 'Clean all projects' radio button is

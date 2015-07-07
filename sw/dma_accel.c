@@ -37,17 +37,17 @@ static void s2mm_isr(void* CallbackRef)
 	// Local variables
 	int      irq_status;
 	int      time_out;
-	XAxiDma* p_axi_dma_inst = (XAxiDma*)CallbackRef;
+	XAxiDma* p_dma_inst = (XAxiDma*)CallbackRef;
 
 	// Disable interrupts
-	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
-	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrDisable(p_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
+	XAxiDma_IntrDisable(p_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
 
 	// Read pending interrupts
-	irq_status = XAxiDma_IntrGetIrq(p_axi_dma_inst, XAXIDMA_DEVICE_TO_DMA);
+	irq_status = XAxiDma_IntrGetIrq(p_dma_inst, XAXIDMA_DEVICE_TO_DMA);
 
 	// Acknowledge pending interrupts
-	XAxiDma_IntrAckIrq(p_axi_dma_inst, irq_status, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrAckIrq(p_dma_inst, irq_status, XAXIDMA_DEVICE_TO_DMA);
 
 	// If no interrupt is asserted, we do not do anything
 	if (!(irq_status & XAXIDMA_IRQ_ALL_MASK))
@@ -62,12 +62,12 @@ static void s2mm_isr(void* CallbackRef)
 		g_dma_err = 1;
 
 		// Reset should never fail for transmit channel
-		XAxiDma_Reset(p_axi_dma_inst);
+		XAxiDma_Reset(p_dma_inst);
 
 		time_out = RESET_TIMEOUT_COUNTER;
 		while (time_out)
 		{
-			if (XAxiDma_ResetIsDone(p_axi_dma_inst))
+			if (XAxiDma_ResetIsDone(p_dma_inst))
 				break;
 
 			time_out -= 1;
@@ -81,8 +81,8 @@ static void s2mm_isr(void* CallbackRef)
 		g_s2mm_done = 1;
 
 	// Re-enable interrupts
-	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
-	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrEnable(p_dma_inst, (XAXIDMA_IRQ_IOC_MASK | XAXIDMA_IRQ_ERROR_MASK), XAXIDMA_DMA_TO_DEVICE);
+	XAxiDma_IntrEnable(p_dma_inst, (XAXIDMA_IRQ_IOC_MASK | XAXIDMA_IRQ_ERROR_MASK), XAXIDMA_DEVICE_TO_DMA);
 
 }
 
@@ -92,17 +92,17 @@ static void mm2s_isr(void* CallbackRef)
 	// Local variables
 	int      irq_status;
 	int      time_out;
-	XAxiDma* p_axi_dma_inst = (XAxiDma*)CallbackRef;
+	XAxiDma* p_dma_inst = (XAxiDma*)CallbackRef;
 
 	// Disable interrupts
-	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
-	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrDisable(p_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
+	XAxiDma_IntrDisable(p_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
 
 	// Read pending interrupts
-	irq_status = XAxiDma_IntrGetIrq(p_axi_dma_inst, XAXIDMA_DMA_TO_DEVICE);
+	irq_status = XAxiDma_IntrGetIrq(p_dma_inst, XAXIDMA_DMA_TO_DEVICE);
 
 	// Acknowledge pending interrupts
-	XAxiDma_IntrAckIrq(p_axi_dma_inst, irq_status, XAXIDMA_DMA_TO_DEVICE);
+	XAxiDma_IntrAckIrq(p_dma_inst, irq_status, XAXIDMA_DMA_TO_DEVICE);
 
 	// If no interrupt is asserted, we do not do anything
 	if (!(irq_status & XAXIDMA_IRQ_ALL_MASK))
@@ -117,13 +117,13 @@ static void mm2s_isr(void* CallbackRef)
 		g_dma_err = 1;
 
 		// Reset could fail and hang
-		XAxiDma_Reset(p_axi_dma_inst);
+		XAxiDma_Reset(p_dma_inst);
 
 		time_out = RESET_TIMEOUT_COUNTER;
 
 		while (time_out)
 		{
-			if (XAxiDma_ResetIsDone(p_axi_dma_inst))
+			if (XAxiDma_ResetIsDone(p_dma_inst))
 				break;
 
 			time_out -= 1;
@@ -137,12 +137,12 @@ static void mm2s_isr(void* CallbackRef)
 		g_mm2s_done = 1;
 
 	// Re-enable interrupts
-	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
-	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrEnable(p_dma_inst, (XAXIDMA_IRQ_IOC_MASK | XAXIDMA_IRQ_ERROR_MASK), XAXIDMA_DMA_TO_DEVICE);
+	XAxiDma_IntrEnable(p_dma_inst, (XAXIDMA_IRQ_IOC_MASK | XAXIDMA_IRQ_ERROR_MASK), XAXIDMA_DEVICE_TO_DMA);
 
 }
 
-static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_axi_dma_inst, int s2mm_intr_id, int mm2s_intr_id)
+static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_dma_inst, int s2mm_intr_id, int mm2s_intr_id)
 {
 
 	// Local variables
@@ -170,13 +170,13 @@ static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_axi_dm
 	XScuGic_SetPriorityTriggerType(p_intc_inst, mm2s_intr_id, 0xA8, 0x3);
 
 	// Connect handlers
-	status = XScuGic_Connect(p_intc_inst, s2mm_intr_id, (Xil_InterruptHandler)s2mm_isr, p_axi_dma_inst);
+	status = XScuGic_Connect(p_intc_inst, s2mm_intr_id, (Xil_InterruptHandler)s2mm_isr, p_dma_inst);
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Failed to connect s2mm_isr to the interrupt controller.\r\n", status);
 		return DMA_ACCEL_INTC_INIT_FAIL;
 	}
-	status = XScuGic_Connect(p_intc_inst, mm2s_intr_id, (Xil_InterruptHandler)mm2s_isr, p_axi_dma_inst);
+	status = XScuGic_Connect(p_intc_inst, mm2s_intr_id, (Xil_InterruptHandler)mm2s_isr, p_dma_inst);
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Failed to connect mm2s_isr to the interrupt controller.\r\n", status);
@@ -198,7 +198,7 @@ static int init_intc(XScuGic* p_intc_inst, int intc_device_id, XAxiDma* p_axi_dm
 
 }
 
-static int init_dma(XAxiDma* p_axi_dma_inst, int dma_device_id)
+static int init_dma(XAxiDma* p_dma_inst, int dma_device_id)
 {
 
 	// Local variables
@@ -214,7 +214,7 @@ static int init_dma(XAxiDma* p_axi_dma_inst, int dma_device_id)
 	}
 
 	// Initialize driver
-	status = XAxiDma_CfgInitialize(p_axi_dma_inst, cfg_ptr);
+	status = XAxiDma_CfgInitialize(p_dma_inst, cfg_ptr);
 	if (status != XST_SUCCESS)
 	{
 		xil_printf("ERROR! Initialization of AXI DMA failed with %d\r\n", status);
@@ -222,23 +222,19 @@ static int init_dma(XAxiDma* p_axi_dma_inst, int dma_device_id)
 	}
 
 	// Test for Scatter Gather
-	if (XAxiDma_HasSg(p_axi_dma_inst))
+	if (XAxiDma_HasSg(p_dma_inst))
 	{
 		xil_printf("ERROR! Device configured as SG mode.\r\n");
 		return DMA_ACCEL_DMA_INIT_FAIL;
 	}
 
-	// Disable interrupts for both channels
-	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
-	XAxiDma_IntrDisable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
-
 	// Reset DMA
-	XAxiDma_Reset(p_axi_dma_inst);
-	while (!XAxiDma_ResetIsDone(p_axi_dma_inst)) {}
+	XAxiDma_Reset(p_dma_inst);
+	while (!XAxiDma_ResetIsDone(p_dma_inst)) {}
 
 	// Enable DMA interrupts
-	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
-	XAxiDma_IntrEnable(p_axi_dma_inst, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
+	XAxiDma_IntrEnable(p_dma_inst, (XAXIDMA_IRQ_IOC_MASK | XAXIDMA_IRQ_ERROR_MASK), XAXIDMA_DMA_TO_DEVICE);
+	XAxiDma_IntrEnable(p_dma_inst, (XAXIDMA_IRQ_IOC_MASK | XAXIDMA_IRQ_ERROR_MASK), XAXIDMA_DEVICE_TO_DMA);
 
 	return DMA_ACCEL_SUCCESS;
 
@@ -391,7 +387,7 @@ int dma_accel_xfer(dma_accel_t* p_dma_accel_inst)
 	}
 
 	// Wait for transfer to complete
-	while (!(g_s2mm_done && g_mm2s_done) && !g_dma_err){ /* The processor could be doing something else here while waiting for an IRQ. */ };
+	while (!(g_s2mm_done && g_mm2s_done) && !g_dma_err){ /* The processor could be doing something else here while waiting for an IRQ. */ }
 
 	// Check DMA for errors
 	if (g_dma_err)

@@ -8,8 +8,7 @@
 // File Name:      helloworld.c
 // Target Devices: Zynq
 // Tool Versions:  2015.1
-// Description:    Implementation of FFT and FIR using a hardware accelerator with
-//                 DMA.
+// Description:    Implementation of FFT using a hardware accelerator with DMA.
 // Dependencies:
 //   - xuartps_hw.h - Driver version v3.0
 //   - fft.h        - Driver version v1.0
@@ -253,7 +252,10 @@ void which_fft_param(fft_t* p_fft_inst)
 		}
 		else if (c == '1')
 		{
-			xil_printf("What would you like to set the FFT direction to? Type '1' for forward. Type '0' for inverse.\n\r");
+			
+			xil_printf("What would you like to set the FFT direction to? Type:\n\r");
+			xil_printf("0: Inverse\n\r");
+			xil_printf("1: Forward\n\r");
 
 			c = XUartPs_RecvByte(XPAR_PS7_UART_1_BASEADDR);
 			while (1)
