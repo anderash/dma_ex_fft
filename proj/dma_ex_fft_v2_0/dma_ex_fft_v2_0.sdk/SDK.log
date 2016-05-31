@@ -1,0 +1,51 @@
+11:13:05 INFO  : Launching XSDB server: xsdb -n /packages/LabSoC/Xilinx/SDK/2015.4/scripts/xsdb/xsdb/xsdb-server.tcl
+11:13:27 INFO  : XSDB server has started successfully.
+11:13:36 INFO  : Processing command line option -hwspec /homes/asheim/Documents/DS/FPGA/dma_ex_fft/proj/dma_ex_fft_v2_0/dma_ex_fft_v2_0.sdk/design_1_wrapper.hdf.
+11:35:08 INFO  : Launching XSDB server: xsdb -n /packages/LabSoC/Xilinx/SDK/2015.4/scripts/xsdb/xsdb/xsdb-server.tcl
+11:35:10 INFO  : XSDB server has started successfully.
+11:35:13 INFO  : Processing command line option -hwspec /homes/asheim/Documents/DS/FPGA/dma_ex_fft/proj/dma_ex_fft_v2_0/dma_ex_fft_v2_0.sdk/design_1_wrapper.hdf.
+11:35:13 INFO  : Checking for hwspec changes in the project design_1_wrapper_hw_platform_0.
+11:45:35 INFO  : Successfully generated /homes/asheim/Documents/DS/FPGA/dma_ex_fft/proj/dma_ex_fft_v2_0/dma_ex_fft_v2_0.sdk/dma_ex_fft/src/lscript.ld.
+11:45:35 INFO  : Applying linker script to all configurations of project dma_ex_fft.
+11:45:35 INFO  : Setting rebuild state to true for all configurations of project dma_ex_fft.
+11:51:03 INFO  : Inferring section assignments and sizes from elf file: /homes/asheim/Documents/DS/FPGA/dma_ex_fft/proj/dma_ex_fft_v2_0/dma_ex_fft_v2_0.sdk/dma_ex_fft_1/Debug/dma_ex_fft_1.elf
+11:51:32 INFO  : Successfully generated /homes/asheim/Documents/DS/FPGA/dma_ex_fft/proj/dma_ex_fft_v2_0/dma_ex_fft_v2_0.sdk/dma_ex_fft_1/src/lscript.ld.
+11:51:32 INFO  : Applying linker script to all configurations of project dma_ex_fft_1.
+11:51:32 INFO  : Setting rebuild state to true for all configurations of project dma_ex_fft_1.
+11:59:24 INFO  : Refreshed build settings on project dma_ex_fft_1
+12:55:19 INFO  : Launching XSDB server: xsdb -n /packages/LabSoC/Xilinx/SDK/2015.4/scripts/xsdb/xsdb/xsdb-server.tcl
+12:55:24 INFO  : XSDB server has started successfully.
+12:55:33 INFO  : Processing command line option -hwspec /homes/asheim/Documents/DS/FPGA/dma_ex_fft/proj/dma_ex_fft_v2_0/dma_ex_fft_v2_0.sdk/design_1_wrapper.hdf.
+12:55:33 INFO  : Checking for hwspec changes in the project design_1_wrapper_hw_platform_0.
+13:28:54 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+14:20:55 INFO  : Connected to target on host '127.0.0.1' and port '3121'.
+14:20:55 INFO  : 'targets -set -filter {jtag_cable_name =~ "Digilent Zybo 210279654157A" && level==0} -index 1' command is executed.
+14:20:56 INFO  : FPGA configured successfully with bitstream "/homes/asheim/Documents/DS/FPGA/dma_ex_fft/proj/dma_ex_fft_v2_0/dma_ex_fft_v2_0.sdk/design_1_wrapper_hw_platform_0/design_1_wrapper.bit"
+14:27:14 ERROR : Unexpected error while launching program.
+java.lang.RuntimeException: Error while running ps7_init method.
+Debug Operation Not Supported on the Target, Current Processor State is not "Stopped"
+
+	at com.xilinx.sdk.targetmanager.internal.TM.run_ps7_init(TM.java:1089)
+	at com.xilinx.sdk.debug.core.XilinxAppLaunchConfigurationDelegate.runTargetSetup(XilinxAppLaunchConfigurationDelegate.java:514)
+	at com.xilinx.sdk.debug.core.XilinxAppLaunchConfigurationDelegate.runApplication(XilinxAppLaunchConfigurationDelegate.java:616)
+	at com.xilinx.sdk.debug.core.XilinxAppLaunchConfigurationDelegate.launch(XilinxAppLaunchConfigurationDelegate.java:309)
+	at com.xilinx.sdk.debug.ui.XilinxAppLaunchDelegateWrapper.launch(XilinxAppLaunchDelegateWrapper.java:31)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:858)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:707)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.buildAndLaunch(DebugUIPlugin.java:1018)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin$8.run(DebugUIPlugin.java:1222)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:53)
+14:28:58 ERROR : Unexpected error while launching program.
+java.lang.RuntimeException: Error while running ps7_init method.
+Debug Operation Not Supported on the Target, Current Processor State is not "Stopped"
+
+	at com.xilinx.sdk.targetmanager.internal.TM.run_ps7_init(TM.java:1089)
+	at com.xilinx.sdk.debug.core.XilinxAppLaunchConfigurationDelegate.runTargetSetup(XilinxAppLaunchConfigurationDelegate.java:514)
+	at com.xilinx.sdk.debug.core.XilinxAppLaunchConfigurationDelegate.runApplication(XilinxAppLaunchConfigurationDelegate.java:616)
+	at com.xilinx.sdk.debug.core.XilinxAppLaunchConfigurationDelegate.launch(XilinxAppLaunchConfigurationDelegate.java:309)
+	at com.xilinx.sdk.debug.ui.XilinxAppLaunchDelegateWrapper.launch(XilinxAppLaunchDelegateWrapper.java:31)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:858)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:707)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.buildAndLaunch(DebugUIPlugin.java:1018)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin$8.run(DebugUIPlugin.java:1222)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:53)
